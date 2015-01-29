@@ -23,6 +23,9 @@ class Player:
 		self.walky = True
 		self.part1 = False
 		self.part2 = False
+		self.font = pygame.font.Font(None,500)
+		self.health = 5
+		self.hurttimer = 100
 	def checkOff(self):
 		
 		if self.characterx > 219 and self.characterx < 221:
@@ -68,13 +71,30 @@ class Player:
 			self.walky = True
 			self.stateChange = True
 
+		if self.characterx >= 440 or self.characterx <= 0:
+			if self.characterx >= 440:
+				self.characterx = 440
+				self.healthtime()
+			if self.characterx <= 0:
+				self.characterx = 0
+				self.healthtime()
+		if self.charactery >= 300 or self.charactery <= 0:
+			if self.charactery >= 300:
+				self.charactery = 300
+				self.healthtime()
+			if self.charactery <= 0:
+				self.charactery = 0
+				self.healthtime()
 
-		
+		if self.health <= 0:
+			self.health = 0
+			return self.health
 
 		print(self.characterx)
 	def draw(self,aScreen):
 		aScreen.blit(self.playerList[0],(self.playerx,self.playery))
 		aScreen.blit(self.playerList[self.costume],(self.characterx,self.charactery))
+		pygame.draw.rect(aScreen, ((250,0,0)), (20,300,self.health * 30,40), 0) 
 	def left(self):
 		if self.walkx:
 			self.characterx -= .1
@@ -120,7 +140,13 @@ class Player:
 			self.playery -= .1
 			self.costume = 4
 			
-		
+	def healthtime(self):
+		if self.hurttimer > 100:
+				self.health -= 1
+				self.hurttimer = 0
+		self.hurttimer += .5
+
+
 				
 Player = Player()
 screen = pygame.display.set_mode((480,360))
@@ -158,7 +184,9 @@ while running:
 		Player.left()
 	if right:
 		Player.right()
-	Player.checkOff()
+	healthy = Player.checkOff()
+	if healthy == 0:
+		running = False
 	Player.draw(screen)
 	pygame.display.flip()
 pygame.quit()
