@@ -10,6 +10,11 @@ left = False
 class Player:
 	def __init__(self):
 		self.playerList = [pygame.image.load("images/cave.png"), pygame.image.load("images/character.png").convert_alpha(), pygame.image.load("images/character2.png").convert_alpha(),pygame.image.load("images/character3.png").convert_alpha(),pygame.image.load("images/character4.png").convert_alpha()]
+		self.enemyCostume = [pygame.image.load("images/enemy1.png").convert_alpha(), pygame.image.load("images/enemy2.png").convert_alpha()]
+		self.enemies = []
+		self.enemyLocation = []
+		self.x = 0
+		self.y = 0
 		self.playerx = 0
 		self.playery = 0
 		self.characterx = 220
@@ -26,6 +31,8 @@ class Player:
 		self.font = pygame.font.Font(None,500)
 		self.health = 5
 		self.hurttimer = 100
+		self.numofEnemies = 0
+		self.enemynumber = 0
 	def checkOff(self):
 		
 		if self.characterx > 219 and self.characterx < 221:
@@ -44,47 +51,63 @@ class Player:
 		if self.playerx < 0 and self.playerx > -1920:
 			self.scrollx = True
 			self.walkx = False
+
 			self.stateChange = False
 			self.part1 = False
 			self.part2 = False
+
+
 		if self.playery < 0 and self.playery > -1440:
 			self.scrolly = True
 			self.walky = False
+
 			self.stateChange = False
 			self.part1 = False
 			self.part2 = False
+
+
 		if self.playerx > 0 or self.playerx < -1920:
 			if self.playerx > 0:
 				self.playerx = 0
+
 			if self.playerx < -1920:
 				self.playerx = -1920
 			self.scrollx = False
 			self.walkx = True
 			self.stateChange = True
 
+
 		if self.playery > 0 or self.playery < -1440:
 			if self.playery > 0:
 				self.playery = 0
+
 			if self.playery < -1440:
 				self.playery = -1440
 			self.scrolly = False
 			self.walky = True
 			self.stateChange = True
 
+
 		if self.characterx >= 440 or self.characterx <= 0:
 			if self.characterx >= 440:
 				self.characterx = 440
 				self.healthtime()
+
 			if self.characterx <= 0:
 				self.characterx = 0
 				self.healthtime()
+
+
 		if self.charactery >= 300 or self.charactery <= 0:
 			if self.charactery >= 300:
 				self.charactery = 300
 				self.healthtime()
+
 			if self.charactery <= 0:
 				self.charactery = 0
 				self.healthtime()
+
+
 
 		if self.health <= 0:
 			self.health = 0
@@ -92,10 +115,37 @@ class Player:
 
 		print(self.characterx)
 	def draw(self,aScreen):
+		
+
 		aScreen.blit(self.playerList[0],(self.playerx,self.playery))
+		self.enemynumber = 0
+		for f in self.enemies:
+				aScreen.blit(f,(self.enemyLocation[self.enemynumber]+ self.playerx  , self.enemyLocation[self.enemynumber + 1]+ self.playery))
+				self.enemynumber += 1
 		aScreen.blit(self.playerList[self.costume],(self.characterx,self.charactery))
-		pygame.draw.rect(aScreen, ((250,0,0)), (20,300,self.health * 30,40), 0) 
+
+		pygame.draw.rect(aScreen, ((250,0,0)), (20,300,self.health * 30,40), 0)
+		
+
+
+	def newEnemies(self):
+		self.numofEnemies = 0
+		self.numofEnemies = random.randint(10,20)
+		while self.numofEnemies > 0:
+			self.x = random.randint(0,2400)
+			self.y = random.randint(0,1800)
+			
+			self.enemyLocation.append(self.x)
+			self.enemyLocation.append(self.y)
+			self.enemies.append(self.enemyCostume[0])
+
+			self.numofEnemies -= 1
+	
+		
+			
+
 	def left(self):
+
 		if self.walkx:
 			self.characterx -= .1
 			self.costume = 1
@@ -149,6 +199,7 @@ class Player:
 
 				
 Player = Player()
+Player.newEnemies()
 screen = pygame.display.set_mode((480,360))
 running = True
 while running:
@@ -187,6 +238,8 @@ while running:
 	healthy = Player.checkOff()
 	if healthy == 0:
 		running = False
+	
 	Player.draw(screen)
+	
 	pygame.display.flip()
 pygame.quit()
