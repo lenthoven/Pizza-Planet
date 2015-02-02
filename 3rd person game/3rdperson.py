@@ -12,7 +12,8 @@ class Player:
 		self.playerList = [pygame.image.load("images/cave.png"), pygame.image.load("images/character.png").convert_alpha(), pygame.image.load("images/character2.png").convert_alpha(),pygame.image.load("images/character3.png").convert_alpha(),pygame.image.load("images/character4.png").convert_alpha()]
 		self.enemyCostume = [pygame.image.load("images/enemy1.png").convert_alpha(), pygame.image.load("images/enemy2.png").convert_alpha()]
 		self.enemies = []
-		self.enemyLocation = []
+		self.enemyLocationx = []
+		self.enemyLocationy = []
 		self.x = 0
 		self.y = 0
 		self.playerx = 0
@@ -30,9 +31,13 @@ class Player:
 		self.part2 = False
 		self.font = pygame.font.Font(None,500)
 		self.health = 5
-		self.hurttimer = 100
+		self.hurttimer = 500
 		self.numofEnemies = 0
 		self.enemynumber = 0
+		self.checknum = 0
+		self.checkcount = 0
+		self.checkx = False
+		self.checky = False
 	def checkOff(self):
 		
 		if self.characterx > 219 and self.characterx < 221:
@@ -91,21 +96,21 @@ class Player:
 		if self.characterx >= 440 or self.characterx <= 0:
 			if self.characterx >= 440:
 				self.characterx = 440
-				self.healthtime()
+				
 
 			if self.characterx <= 0:
 				self.characterx = 0
-				self.healthtime()
+				
 
 
 		if self.charactery >= 300 or self.charactery <= 0:
 			if self.charactery >= 300:
 				self.charactery = 300
-				self.healthtime()
+				
 
 			if self.charactery <= 0:
 				self.charactery = 0
-				self.healthtime()
+				
 
 
 
@@ -113,14 +118,15 @@ class Player:
 			self.health = 0
 			return self.health
 
-		print(self.characterx)
+		self.hurttimer += .5
+		
 	def draw(self,aScreen):
 		
 
 		aScreen.blit(self.playerList[0],(self.playerx,self.playery))
 		self.enemynumber = 0
 		for f in self.enemies:
-				aScreen.blit(f,(self.enemyLocation[self.enemynumber]+ self.playerx  , self.enemyLocation[self.enemynumber + 1]+ self.playery))
+				aScreen.blit(f,(self.enemyLocationx[self.enemynumber]+ self.playerx  , self.enemyLocationy[self.enemynumber]+ self.playery))
 				self.enemynumber += 1
 		aScreen.blit(self.playerList[self.costume],(self.characterx,self.charactery))
 
@@ -131,17 +137,18 @@ class Player:
 	def newEnemies(self):
 		self.numofEnemies = 0
 		self.numofEnemies = random.randint(10,20)
+		self.checkcount = self.numofEnemies
 		while self.numofEnemies > 0:
 			self.x = random.randint(0,2400)
 			self.y = random.randint(0,1800)
 			
-			self.enemyLocation.append(self.x)
-			self.enemyLocation.append(self.y)
+			self.enemyLocationx.append(self.x)
+			self.enemyLocationy.append(self.y)
 			self.enemies.append(self.enemyCostume[0])
 
 			self.numofEnemies -= 1
 	
-		
+	
 			
 
 	def left(self):
@@ -191,12 +198,32 @@ class Player:
 			self.costume = 4
 			
 	def healthtime(self):
-		if self.hurttimer > 100:
+		if self.hurttimer > 500:
 				self.health -= 1
 				self.hurttimer = 0
-		self.hurttimer += .5
+		
 
+	def checkHit(self):
+		self.checkx = False
+		self.checky = False
+		self.checknum = 0
+		while self.checknum < self.checkcount:
+			if self.enemyLocationx[self.checknum] + self.playerx < self.characterx + 20 and self.enemyLocationx[self.checknum] + 40 + self.playerx > self.characterx:
+				self.checkx = True
 
+			if self.enemyLocationy[self.checknum] + self.playery < self.charactery + 30 and self.enemyLocationy[self.checknum] + 60 + self.playery > self.charactery:
+				self.checky = True
+
+			self.checknum += 1
+
+			if self.checkx and self.checky:
+				self.healthtime()
+			self.checkx = False
+			self.checky = False
+
+			
+			
+			
 				
 Player = Player()
 Player.newEnemies()
@@ -238,8 +265,9 @@ while running:
 	healthy = Player.checkOff()
 	if healthy == 0:
 		running = False
-	
+	Player.checkHit()
 	Player.draw(screen)
 	
 	pygame.display.flip()
+
 pygame.quit()
