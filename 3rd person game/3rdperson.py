@@ -15,6 +15,11 @@ class Player:
 		self.enemyLocationx = []
 		self.enemyLocationy = []
 		self.enemyHealth = []
+		self.fireballs = [pygame.image.load("images/fire1.png").convert_alpha(),pygame.image.load("images/fire2.png").convert_alpha(),pygame.image.load("images/fire3.png").convert_alpha(),pygame.image.load("images/fire4.png").convert_alpha()]
+		self.firelist = []
+		self.firelocationx = []
+		self.firelocationy = []
+		self.firedirection = []
 		self.x = 0
 		self.y = 0
 		self.playerx = 0
@@ -44,6 +49,11 @@ class Player:
 		self.enemymove = False
 		self.movespot = -1
 		self.attacktimer = 200
+		self.attacking = False
+		self.fireskin = 0
+		self.fx = 0
+		self.fy = 0
+		self.firenum = 0
 	def checkOff(self):
 		
 		if self.characterx > 219 and self.characterx < 221:
@@ -124,11 +134,17 @@ class Player:
 			self.health = 0
 			return self.health
 
+		self.thelocation = 0
+
+		
 		self.hurttimer += .5
 		self.attacktimer += 1
+
+	
+
 	def draw(self,aScreen):
 		
-
+		self.firenumber = 0
 		aScreen.blit(self.playerList[0],(self.playerx,self.playery))
 		self.enemynumber = 0
 		for f in self.enemies:
@@ -137,7 +153,9 @@ class Player:
 		aScreen.blit(self.playerList[self.costume],(self.characterx,self.charactery))
 
 		pygame.draw.rect(aScreen, ((250,0,0)), (20,300,self.health * 30,40), 0)
-		
+		for f in self.firelist:
+			aScreen.blit(f,(self.firelocationx[self.firenumber],self.firelocationy[self.firenumber]))
+			self.firenumber += 1
 
 
 	def newEnemies(self):
@@ -154,12 +172,71 @@ class Player:
 
 			self.numofEnemies -= 1
 	
-	def attack(self):
-			if self.costume == 1 or self.costume == 5:
-				self.costume = 5
-				if self.attacktimer > 200:
-					self.attacktimer = 0
-				self.attacktimer += 1
+	def attacks(self):
+		
+		
+		self.fx = self.characterx
+		self.fy = self.charactery + 30
+		if self.firenum <= 2:
+			if self.costume == 1:
+				self.firelist.append(self.fireballs[0])
+				self.firelocationx.append(self.fx)
+				self.firelocationy.append(self.fy)
+				self.firedirection.append(self.costume)
+			if self.costume == 2:
+				self.firelist.append(self.fireballs[1])
+				self.firelocationx.append(self.fx)
+				self.firelocationy.append(self.fy)
+				self.firedirection.append(self.costume)
+			if self.costume == 3:
+				self.firelist.append(self.fireballs[2])
+				self.firelocationx.append(self.fx)
+				self.firelocationy.append(self.fy)
+				self.firedirection.append(self.costume)
+			if self.costume == 4:
+				self.firelist.append(self.fireballs[3])
+				self.firelocationx.append(self.fx)
+				self.firelocationy.append(self.fy)
+				self.firedirection.append(self.costume)
+			
+			self.firenum += 1
+
+	def firefly(self):
+		self.fireplacement = 0
+		for f in self.firedirection:
+			if f == 1:
+				self.firelocationx[self.fireplacement] -= 1
+
+			if f == 2:
+				self.firelocationx[self.fireplacement] += 1
+
+			if f == 3:
+				self.firelocationy[self.fireplacement] -= 1
+
+			if f == 4:
+				self.firelocationy[self.fireplacement] += 1
+			print("works")
+			self.fireplacement += 1
+
+	def firecheck(self):
+		self.thelocation = 0
+		for f in self.firelocationx:
+			if f > 480 or f < 0:
+				self.firelocationx.pop(self.thelocation)
+				self.firelist.pop(self.thelocation)
+				self.firelocationy.pop(self.thelocation)
+				self.firedirection.pop(self.thelocation)
+				self.firenum -= 1
+			self.thelocation += 1
+		self.thelocation = 0
+		for f in self.firelocationy:
+			if f > 360 or f < 0:
+				self.firelocationy.pop(self.thelocation)
+				self.firelist.pop(self.thelocation)
+				self.firelocationx.pop(self.thelocation)
+				self.firedirection.pop(self.thelocation)
+				self.firenum -= 1
+			self.thelocation += 1
 
 	def left(self):
 
@@ -262,7 +339,7 @@ class Player:
 
 			
 			
-				
+attack1 = False			
 Player = Player()
 Player.newEnemies()
 screen = pygame.display.set_mode((480,360))
@@ -281,8 +358,9 @@ while running:
 				up = True
 			if event.key == pygame.K_DOWN:
 				down = True
-			if event.key == pygame.K_SPACE:
-				Player.attack()
+			if event.key == pygame.K_z:
+				attack1 = True
+				
 		if event.type == pygame.KEYUP:
 			if event.key == pygame.K_LEFT:
 				left = False
@@ -292,7 +370,10 @@ while running:
 				up = False
 			if event.key == pygame.K_DOWN:
 				down = False
-				
+	if attack1:
+		Player.attacks()
+		attack1 = False
+
 	if up:
 		Player.up()
 	if down:
@@ -306,6 +387,8 @@ while running:
 		running = False
 	Player.checkHit()
 	Player.attack()
+	Player.firefly()
+	Player.firecheck()
 	Player.draw(screen)
 	
 	pygame.display.flip()
