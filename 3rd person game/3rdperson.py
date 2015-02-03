@@ -9,11 +9,12 @@ right = False
 left = False
 class Player:
 	def __init__(self):
-		self.playerList = [pygame.image.load("images/cave.png"), pygame.image.load("images/character.png").convert_alpha(), pygame.image.load("images/character2.png").convert_alpha(),pygame.image.load("images/character3.png").convert_alpha(),pygame.image.load("images/character4.png").convert_alpha()]
+		self.playerList = [pygame.image.load("images/cave.png"), pygame.image.load("images/character.png").convert_alpha(), pygame.image.load("images/character2.png").convert_alpha(),pygame.image.load("images/character3.png").convert_alpha(),pygame.image.load("images/character4.png").convert_alpha(),pygame.image.load("images/characterattack.png").convert_alpha()]
 		self.enemyCostume = [pygame.image.load("images/enemy1.png").convert_alpha(), pygame.image.load("images/enemy2.png").convert_alpha()]
 		self.enemies = []
 		self.enemyLocationx = []
 		self.enemyLocationy = []
+		self.enemyHealth = []
 		self.x = 0
 		self.y = 0
 		self.playerx = 0
@@ -38,6 +39,11 @@ class Player:
 		self.checkcount = 0
 		self.checkx = False
 		self.checky = False
+		self.attackx = False
+		self.attacky = False
+		self.enemymove = False
+		self.movespot = -1
+		self.attacktimer = 200
 	def checkOff(self):
 		
 		if self.characterx > 219 and self.characterx < 221:
@@ -119,7 +125,7 @@ class Player:
 			return self.health
 
 		self.hurttimer += .5
-		
+		self.attacktimer += 1
 	def draw(self,aScreen):
 		
 
@@ -136,7 +142,7 @@ class Player:
 
 	def newEnemies(self):
 		self.numofEnemies = 0
-		self.numofEnemies = random.randint(10,20)
+		self.numofEnemies = random.randint(30,50)
 		self.checkcount = self.numofEnemies
 		while self.numofEnemies > 0:
 			self.x = random.randint(0,2400)
@@ -148,8 +154,12 @@ class Player:
 
 			self.numofEnemies -= 1
 	
-	
-			
+	def attack(self):
+			if self.costume == 1 or self.costume == 5:
+				self.costume = 5
+				if self.attacktimer > 200:
+					self.attacktimer = 0
+				self.attacktimer += 1
 
 	def left(self):
 
@@ -217,11 +227,39 @@ class Player:
 			self.checknum += 1
 
 			if self.checkx and self.checky:
-				self.healthtime()
+				self.checkx = False
 			self.checkx = False
 			self.checky = False
 
-			
+	def attack(self):
+		self.attackx = False
+		self.attacky = False
+		self.checknum = 0
+		while self.checknum < self.checkcount:
+			if self.enemyLocationx[self.checknum] + self.playerx > 0 and self.enemyLocationx[self.checknum] + self.playerx < 480:
+				self.attackx = True
+
+			if self.enemyLocationy[self.checknum] + self.playery > 0 and self.enemyLocationy[self.checknum] + self.playery < 360:
+
+				self.attacky = True
+
+			if self.attackx and self.attacky:
+				if self.enemyLocationx[self.checknum] + self.playerx > self.characterx:
+					self.enemyLocationx[self.checknum] -= .07
+
+				if self.enemyLocationx[self.checknum] + self.playerx < self.characterx:
+					self.enemyLocationx[self.checknum] += .07
+
+				if self.enemyLocationy[self.checknum] + self.playery > self.charactery:
+					self.enemyLocationy[self.checknum] -= .07
+
+				if self.enemyLocationy[self.checknum] + self.playery < self.charactery:
+					self.enemyLocationy[self.checknum] += .07
+
+			self.attackx = False
+			self.attacky = False
+			self.checknum += 1
+
 			
 			
 				
@@ -243,7 +281,8 @@ while running:
 				up = True
 			if event.key == pygame.K_DOWN:
 				down = True
-
+			if event.key == pygame.K_SPACE:
+				Player.attack()
 		if event.type == pygame.KEYUP:
 			if event.key == pygame.K_LEFT:
 				left = False
@@ -266,6 +305,7 @@ while running:
 	if healthy == 0:
 		running = False
 	Player.checkHit()
+	Player.attack()
 	Player.draw(screen)
 	
 	pygame.display.flip()
