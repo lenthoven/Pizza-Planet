@@ -358,17 +358,17 @@ class Player:
 				self.attacky = True
 
 			if self.attackx and self.attacky:
-				if self.enemyLocationx[self.checknum] + self.playerx > self.characterx:
-					self.enemyLocationx[self.checknum] -= .2
+				if self.enemyLocationx[self.checknum] + self.playerx  > self.characterx:
+					self.enemyLocationx[self.checknum] -= .15
 
-				if self.enemyLocationx[self.checknum] + self.playerx < self.characterx:
-					self.enemyLocationx[self.checknum] += .2
+				if self.enemyLocationx[self.checknum] + self.playerx  < self.characterx:
+					self.enemyLocationx[self.checknum] += .15
 
 				if self.enemyLocationy[self.checknum] + self.playery > self.charactery:
-					self.enemyLocationy[self.checknum] -= .2
+					self.enemyLocationy[self.checknum] -= .15
 
 				if self.enemyLocationy[self.checknum] + self.playery < self.charactery:
-					self.enemyLocationy[self.checknum] += .2
+					self.enemyLocationy[self.checknum] += .15
 
 			self.attackx = False
 			self.attacky = False
