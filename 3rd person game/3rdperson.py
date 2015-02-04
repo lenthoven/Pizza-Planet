@@ -54,6 +54,7 @@ class Player:
 		self.fx = 0
 		self.fy = 0
 		self.firenum = 0
+		self.deadcount = 0
 	def checkOff(self):
 		
 		if self.characterx > 219 and self.characterx < 221:
@@ -143,7 +144,7 @@ class Player:
 	
 
 	def draw(self,aScreen):
-		
+		self.attacking = False
 		self.firenumber = 0
 		aScreen.blit(self.playerList[0],(self.playerx,self.playery))
 		self.enemynumber = 0
@@ -156,11 +157,12 @@ class Player:
 		for f in self.firelist:
 			aScreen.blit(f,(self.firelocationx[self.firenumber],self.firelocationy[self.firenumber]))
 			self.firenumber += 1
-
+		for f in self.firelist:
+			self.attacking = True
 
 	def newEnemies(self):
 		self.numofEnemies = 0
-		self.numofEnemies = random.randint(30,50)
+		self.numofEnemies = random.randint(50,100)
 		self.checkcount = self.numofEnemies
 		while self.numofEnemies > 0:
 			self.x = random.randint(0,2400)
@@ -174,48 +176,51 @@ class Player:
 	
 	def attacks(self):
 		
-		
-		self.fx = self.characterx
-		self.fy = self.charactery + 30
-		if self.firenum <= 2:
-			if self.costume == 1:
-				self.firelist.append(self.fireballs[0])
-				self.firelocationx.append(self.fx)
-				self.firelocationy.append(self.fy)
-				self.firedirection.append(self.costume)
-			if self.costume == 2:
-				self.firelist.append(self.fireballs[1])
-				self.firelocationx.append(self.fx)
-				self.firelocationy.append(self.fy)
-				self.firedirection.append(self.costume)
-			if self.costume == 3:
-				self.firelist.append(self.fireballs[2])
-				self.firelocationx.append(self.fx)
-				self.firelocationy.append(self.fy)
-				self.firedirection.append(self.costume)
-			if self.costume == 4:
-				self.firelist.append(self.fireballs[3])
-				self.firelocationx.append(self.fx)
-				self.firelocationy.append(self.fy)
-				self.firedirection.append(self.costume)
-			
-			self.firenum += 1
-
+		if self.attacktimer > 300:
+			self.attacktimer = 0
+			self.fx = self.characterx
+			self.fy = self.charactery + 30
+			if self.firenum <= 0:
+				if self.costume == 1:
+					self.firelist.append(self.fireballs[0])
+					self.firelocationx.append(self.fx)
+					self.firelocationy.append(self.fy)
+					self.firedirection.append(self.costume)
+				if self.costume == 2:
+					self.firelist.append(self.fireballs[1])
+					self.firelocationx.append(self.fx)
+					self.firelocationy.append(self.fy)
+					self.firedirection.append(self.costume)
+				if self.costume == 3:
+					self.firelist.append(self.fireballs[2])
+					self.firelocationx.append(self.fx)
+					self.firelocationy.append(self.fy)
+					self.firedirection.append(self.costume)
+				if self.costume == 4:
+					self.firelist.append(self.fireballs[3])
+					self.firelocationx.append(self.fx)
+					self.firelocationy.append(self.fy)
+					self.firedirection.append(self.costume)
+				
+				self.firenum += 1
+		self.deadcount = 0
+		for f in self.firelist:
+			self.deadcount += 1
 	def firefly(self):
 		self.fireplacement = 0
 		for f in self.firedirection:
 			if f == 1:
-				self.firelocationx[self.fireplacement] -= 1
+				self.firelocationx[self.fireplacement] -= .75
 
 			if f == 2:
-				self.firelocationx[self.fireplacement] += 1
+				self.firelocationx[self.fireplacement] += .75
 
 			if f == 3:
-				self.firelocationy[self.fireplacement] -= 1
+				self.firelocationy[self.fireplacement] -= .75
 
 			if f == 4:
-				self.firelocationy[self.fireplacement] += 1
-			print("works")
+				self.firelocationy[self.fireplacement] += .75
+			
 			self.fireplacement += 1
 
 	def firecheck(self):
@@ -227,6 +232,7 @@ class Player:
 				self.firelocationy.pop(self.thelocation)
 				self.firedirection.pop(self.thelocation)
 				self.firenum -= 1
+				self.attacking = False
 			self.thelocation += 1
 		self.thelocation = 0
 		for f in self.firelocationy:
@@ -236,16 +242,46 @@ class Player:
 				self.firelocationx.pop(self.thelocation)
 				self.firedirection.pop(self.thelocation)
 				self.firenum -= 1
+				self.attacking = False
 			self.thelocation += 1
+
+	def checkdead(self):
+		self.deadx = False
+		self.deady = False
+		self.deadcount = 0
+		if self.attacking:
+			for f in self.enemyLocationx:
+				if self.attacking:
+					self.deadx = False
+					self.deady = False
+					if self.firelocationx[0] + 10 > f + self.playerx and self.firelocationx[0] + 10 < f + self.playerx + 40:
+						self.deadx = True
+					if self.firelocationy[0] + 10 > self.enemyLocationy[self.deadcount] + self.playery and self.firelocationy[0] + 10 < self.enemyLocationy[self.deadcount] + 60 + self.playery:
+						self.deady = True
+
+					if self.deadx and self.deady:
+						self.firelocationx.pop(0)
+						self.firelist.pop(0)
+						self.firelocationy.pop(0)
+						self.firedirection.pop(0)
+						self.enemyLocationy.pop(self.deadcount)
+						self.enemyLocationx.pop(self.deadcount)
+						self.enemies.pop(self.deadcount)
+						self.attacking = False
+						self.checkcount -= 1
+						self.firenum -= 1
+					self.deadcount += 1
+	
+
 
 	def left(self):
 
 		if self.walkx:
-			self.characterx -= .1
+			self.characterx -= .2
 			self.costume = 1
 			
 		if self.scrollx:
-			self.playerx += .1
+			self.playerx += .2
 			self.costume = 1
 
 		
@@ -253,35 +289,35 @@ class Player:
 
 	def right(self):
 		if self.walkx:
-			self.characterx += .1
+			self.characterx += .2
 			self.costume = 2
 		
 		if self.scrollx:
-			self.playerx -= .1
+			self.playerx -= .2
 			self.costume = 2
 		
 	
 				
 	def up(self):
 		if self.walky:
-			self.charactery -= .1
+			self.charactery -= .2
 			self.costume = 3
 		
 
 		if self.scrolly:
-			self.playery += .1
+			self.playery += .2
 			self.costume = 3
 			
 		
 				
 	def down(self):
 		if self.walky:
-			self.charactery += .1
+			self.charactery += .2
 			self.costume = 4
 
 		
 		if self.scrolly:
-			self.playery -= .1
+			self.playery -= .2
 			self.costume = 4
 			
 	def healthtime(self):
@@ -301,13 +337,14 @@ class Player:
 			if self.enemyLocationy[self.checknum] + self.playery < self.charactery + 30 and self.enemyLocationy[self.checknum] + 60 + self.playery > self.charactery:
 				self.checky = True
 
-			self.checknum += 1
+			
 
 			if self.checkx and self.checky:
+				self.healthtime()
 				self.checkx = False
 			self.checkx = False
 			self.checky = False
-
+			self.checknum += 1
 	def attack(self):
 		self.attackx = False
 		self.attacky = False
@@ -322,16 +359,16 @@ class Player:
 
 			if self.attackx and self.attacky:
 				if self.enemyLocationx[self.checknum] + self.playerx > self.characterx:
-					self.enemyLocationx[self.checknum] -= .07
+					self.enemyLocationx[self.checknum] -= .2
 
 				if self.enemyLocationx[self.checknum] + self.playerx < self.characterx:
-					self.enemyLocationx[self.checknum] += .07
+					self.enemyLocationx[self.checknum] += .2
 
 				if self.enemyLocationy[self.checknum] + self.playery > self.charactery:
-					self.enemyLocationy[self.checknum] -= .07
+					self.enemyLocationy[self.checknum] -= .2
 
 				if self.enemyLocationy[self.checknum] + self.playery < self.charactery:
-					self.enemyLocationy[self.checknum] += .07
+					self.enemyLocationy[self.checknum] += .2
 
 			self.attackx = False
 			self.attacky = False
@@ -389,6 +426,7 @@ while running:
 	Player.attack()
 	Player.firefly()
 	Player.firecheck()
+	Player.checkdead()
 	Player.draw(screen)
 	
 	pygame.display.flip()
