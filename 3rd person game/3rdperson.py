@@ -20,6 +20,13 @@ class Player:
 		self.firelocationx = []
 		self.firelocationy = []
 		self.firedirection = []
+		self.coins = []
+		self.coinx = []
+		self.coiny = []
+		self.healthbox = []
+		self.healthy = []
+		self.healthx = []
+
 		self.x = 0
 		self.y = 0
 		self.playerx = 0
@@ -141,11 +148,16 @@ class Player:
 		self.hurttimer += .5
 		self.attacktimer += 1
 
-	
+	def randomizer(self):
+		self.randval = random.randrange(1,10)
+		
+		return self.randval
+
 
 	def draw(self,aScreen):
 		self.attacking = False
 		self.firenumber = 0
+		self.powernumber = 0
 		aScreen.blit(self.playerList[0],(self.playerx,self.playery))
 		self.enemynumber = 0
 		for f in self.enemies:
@@ -159,14 +171,20 @@ class Player:
 			self.firenumber += 1
 		for f in self.firelist:
 			self.attacking = True
-
+		for f in self.coins:
+			aScreen.blit(f,(self.coinx[self.powernumber] + self.playerx,self.coiny[self.powernumber] + self.playery))
+			self.powernumber += 1
+		self.powernumber = 0
+		for f in self.healthbox:
+			aScreen.blit(f,(self.healthx[self.powernumber] + self.playerx,self.healthy[self.powernumber] + self.playery))
+			self.powernumber += 1
 	def newEnemies(self):
 		self.numofEnemies = 0
 		self.numofEnemies = random.randint(50,100)
 		self.checkcount = self.numofEnemies
 		while self.numofEnemies > 0:
-			self.x = random.randint(0,2400)
-			self.y = random.randint(0,1800)
+			self.x = random.randint(500,2400)
+			self.y = random.randint(380,1800)
 			
 			self.enemyLocationx.append(self.x)
 			self.enemyLocationy.append(self.y)
@@ -260,6 +278,15 @@ class Player:
 						self.deady = True
 
 					if self.deadx and self.deady:
+						self.newthing = self.randomizer()
+						if self.newthing == 1 or self.newthing == 2 or self.newthing == 10:
+							self.coins.append(pygame.image.load("images/coin.png").convert_alpha())
+							self.coinx.append(self.enemyLocationx[self.deadcount] )
+							self.coiny.append(self.enemyLocationy[self.deadcount] )
+						if self.newthing == 3:
+							self.healthbox.append(pygame.image.load("images/health.png").convert_alpha())
+							self.healthx.append(self.enemyLocationx[self.deadcount] )
+							self.healthy.append(self.enemyLocationy[self.deadcount] )
 						self.firelocationx.pop(0)
 						self.firelist.pop(0)
 						self.firelocationy.pop(0)
@@ -271,7 +298,8 @@ class Player:
 						self.checkcount -= 1
 						self.firenum -= 1
 					self.deadcount += 1
-	
+	def checkgotdrop(self):
+		self.true = True
 
 
 	def left(self):
@@ -359,17 +387,18 @@ class Player:
 
 			if self.attackx and self.attacky:
 				if self.enemyLocationx[self.checknum] + self.playerx  > self.characterx:
-					self.enemyLocationx[self.checknum] -= .15
+					self.enemyLocationx[self.checknum] -= .15 
+					
 
 				if self.enemyLocationx[self.checknum] + self.playerx  < self.characterx:
 					self.enemyLocationx[self.checknum] += .15
-
+					
 				if self.enemyLocationy[self.checknum] + self.playery > self.charactery:
 					self.enemyLocationy[self.checknum] -= .15
-
+					
 				if self.enemyLocationy[self.checknum] + self.playery < self.charactery:
 					self.enemyLocationy[self.checknum] += .15
-
+					
 			self.attackx = False
 			self.attacky = False
 			self.checknum += 1
