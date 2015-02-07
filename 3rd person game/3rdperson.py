@@ -42,7 +42,7 @@ class Player:
 		self.walky = True
 		self.part1 = False
 		self.part2 = False
-		self.font = pygame.font.Font(None,500)
+		self.font = pygame.font.Font(None,25)
 		self.health = 5
 		self.hurttimer = 500
 		self.numofEnemies = 0
@@ -62,6 +62,8 @@ class Player:
 		self.fy = 0
 		self.firenum = 0
 		self.deadcount = 0
+		self.score = 0
+		self.minimap1 = pygame.image.load("images/minimap.png")
 	def checkOff(self):
 		
 		if self.characterx > 219 and self.characterx < 221:
@@ -147,13 +149,48 @@ class Player:
 		
 		self.hurttimer += .5
 		self.attacktimer += 1
+	def minimap(self):
+		self.thingy = True
+
 
 	def randomizer(self):
 		self.randval = random.randrange(1,10)
 		
 		return self.randval
-
-
+	def checkgotdrop(self):
+		self.dropx = False
+		self.dropy = False
+		self.dropnum = 0
+		for f in self.healthx:
+			if f + 20 + self.playerx > self.characterx and f + 20 + self.playerx < self.characterx + 40:
+				self.dropx = True
+			if self.healthy[self.dropnum] + 20 + self.playery > self.charactery and self.healthy[self.dropnum] + 20 + self.playery < self.charactery + 60:
+				self.dropy = True
+			if self.dropy and self.dropx:
+				self.healthy.pop(self.dropnum)
+				self.healthx.pop(self.dropnum)
+				self.healthbox.pop(self.dropnum)
+				self.health += 1
+				self.healthlimit()
+			self.dropnum += 1
+		self.dropx = False
+		self.dropy = False
+		self.dropnum = 0
+		for f in self.coinx:
+			if f + 20 + self.playerx > self.characterx and f + 20 + self.playerx < self.characterx + 40:
+				self.dropx = True
+			if self.coiny[self.dropnum] + 20 + self.playery > self.charactery and self.coiny[self.dropnum] + 20 + self.playery < self.charactery + 60:
+				self.dropy = True
+			if self.dropy and self.dropx:
+				self.coiny.pop(self.dropnum)
+				self.coinx.pop(self.dropnum)
+				self.coins.pop(self.dropnum)
+				
+				self.score += 450
+				self.dropnum += 1
+	def healthlimit(self):
+		if self.health > 5:
+			self.health = 5
 	def draw(self,aScreen):
 		self.attacking = False
 		self.firenumber = 0
@@ -178,6 +215,10 @@ class Player:
 		for f in self.healthbox:
 			aScreen.blit(f,(self.healthx[self.powernumber] + self.playerx,self.healthy[self.powernumber] + self.playery))
 			self.powernumber += 1
+		self.scoretext = self.font.render(str(self.score),1,(255,255,255))
+		aScreen.blit(self.scoretext,(10,10))
+		self.minimap()
+		aScreen.blit(self.minimap1,(400,300))
 	def newEnemies(self):
 		self.numofEnemies = 0
 		self.numofEnemies = random.randint(50,100)
@@ -278,11 +319,13 @@ class Player:
 						self.deady = True
 
 					if self.deadx and self.deady:
+						self.score += 100
 						self.newthing = self.randomizer()
 						if self.newthing == 1 or self.newthing == 2 or self.newthing == 10:
 							self.coins.append(pygame.image.load("images/coin.png").convert_alpha())
 							self.coinx.append(self.enemyLocationx[self.deadcount] )
 							self.coiny.append(self.enemyLocationy[self.deadcount] )
+
 						if self.newthing == 3:
 							self.healthbox.append(pygame.image.load("images/health.png").convert_alpha())
 							self.healthx.append(self.enemyLocationx[self.deadcount] )
@@ -298,18 +341,17 @@ class Player:
 						self.checkcount -= 1
 						self.firenum -= 1
 					self.deadcount += 1
-	def checkgotdrop(self):
-		self.true = True
+	
 
 
 	def left(self):
 
 		if self.walkx:
-			self.characterx -= .2
+			self.characterx -= .3
 			self.costume = 1
 			
 		if self.scrollx:
-			self.playerx += .2
+			self.playerx += .3
 			self.costume = 1
 
 		
@@ -317,35 +359,35 @@ class Player:
 
 	def right(self):
 		if self.walkx:
-			self.characterx += .2
+			self.characterx += .3
 			self.costume = 2
 		
 		if self.scrollx:
-			self.playerx -= .2
+			self.playerx -= .3
 			self.costume = 2
 		
 	
 				
 	def up(self):
 		if self.walky:
-			self.charactery -= .2
+			self.charactery -= .3
 			self.costume = 3
 		
 
 		if self.scrolly:
-			self.playery += .2
+			self.playery += .3
 			self.costume = 3
 			
 		
 				
 	def down(self):
 		if self.walky:
-			self.charactery += .2
+			self.charactery += .3
 			self.costume = 4
 
 		
 		if self.scrolly:
-			self.playery -= .2
+			self.playery -= .3
 			self.costume = 4
 			
 	def healthtime(self):
@@ -387,17 +429,17 @@ class Player:
 
 			if self.attackx and self.attacky:
 				if self.enemyLocationx[self.checknum] + self.playerx  > self.characterx:
-					self.enemyLocationx[self.checknum] -= .15 
+					self.enemyLocationx[self.checknum] -= .25 
 					
 
 				if self.enemyLocationx[self.checknum] + self.playerx  < self.characterx:
-					self.enemyLocationx[self.checknum] += .15
+					self.enemyLocationx[self.checknum] += .25
 					
 				if self.enemyLocationy[self.checknum] + self.playery > self.charactery:
-					self.enemyLocationy[self.checknum] -= .15
+					self.enemyLocationy[self.checknum] -= .25
 					
 				if self.enemyLocationy[self.checknum] + self.playery < self.charactery:
-					self.enemyLocationy[self.checknum] += .15
+					self.enemyLocationy[self.checknum] += .25
 					
 			self.attackx = False
 			self.attacky = False
@@ -456,6 +498,7 @@ while running:
 	Player.firefly()
 	Player.firecheck()
 	Player.checkdead()
+	Player.checkgotdrop()
 	Player.draw(screen)
 	
 	pygame.display.flip()
