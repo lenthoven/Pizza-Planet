@@ -63,6 +63,7 @@ class Player:
 		self.firenum = 0
 		self.deadcount = 0
 		self.score = 0
+		self.level = 1
 		self.minimap1 = pygame.image.load("images/minimap.png")
 	def checkOff(self):
 		
@@ -221,7 +222,7 @@ class Player:
 		aScreen.blit(self.minimap1,(400,300))
 	def newEnemies(self):
 		self.numofEnemies = 0
-		self.numofEnemies = random.randint(50,100)
+		self.numofEnemies = random.randint(1,3)
 		self.checkcount = self.numofEnemies
 		while self.numofEnemies > 0:
 			self.x = random.randint(500,2400)
@@ -232,7 +233,15 @@ class Player:
 			self.enemies.append(self.enemyCostume[0])
 
 			self.numofEnemies -= 1
-	
+
+	def levelend(self):
+		print (self.checkcount)
+		if self.checkcount == 0:
+			self.newEnemies()
+			self.playerx = 0
+			self.playery = 0
+			self.characterx = 220
+			self.charactery = 150
 	def attacks(self):
 		
 		if self.attacktimer > 300:
@@ -499,6 +508,7 @@ while running:
 	Player.firecheck()
 	Player.checkdead()
 	Player.checkgotdrop()
+	Player.levelend()
 	Player.draw(screen)
 	
 	pygame.display.flip()
